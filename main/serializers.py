@@ -4,6 +4,8 @@ from gprof2dot import basestring
 from django.core.files.base import ContentFile
 from drf_yasg import openapi
 
+from main import models
+
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -34,3 +36,10 @@ class Base64ImageField(serializers.ImageField):
             "description": 'Base64 Image',
             "readOnly": False
         }
+
+
+class ImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ImageModel
+        fields = "__all__"
