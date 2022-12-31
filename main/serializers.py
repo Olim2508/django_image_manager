@@ -1,33 +1,41 @@
 import base64
+import imghdr
+import uuid
+
 from rest_framework import serializers
 from gprof2dot import basestring
 from django.core.files.base import ContentFile
 from drf_yasg import openapi
+from urllib3.packages import six
 
 from main import models
 
 
 class Base64ImageField(serializers.ImageField):
+
     def to_internal_value(self, data):
-        if isinstance(data, basestring) and data.startswith('data:image'):
-            format_, imgstr = data.split(';base64,')
-            ext = format_.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        else:
-            return None
+
+        if isinstance(data, six.string_types):
+            if 'data:' in data and ';base64,' in data:
+                header, data = data.split(';base64,')
+
+            try:
+                decoded_file = base64.b64decode(data)
+            except TypeError:
+                self.fail('invalid_image')
+
+            file_name = str(uuid.uuid4())[:12]
+            file_extension = self.get_file_extension(file_name, decoded_file)
+            complete_file_name = "%s.%s" % (file_name, file_extension, )
+            data = ContentFile(decoded_file, name=complete_file_name)
+
         return super(Base64ImageField, self).to_internal_value(data)
 
-    def to_representation(self, value):
-        if value.name == '' or value.name is None:
-            return ''
-        try:
-            with open(value.path, "rb") as image_file:
-                return 'data:image/%s;base64,%s' % (
-                    value.name.split('.')[-1],
-                    base64.b64encode(image_file.read()).decode("utf-8")
-                )
-        except (FileNotFoundError,):
-            return ''
+    def get_file_extension(self, file_name, decoded_file):
+
+        extension = imghdr.what(file_name, decoded_file)
+        extension = "jpg" if extension == "jpeg" else extension
+        return extension
 
     class Meta:
         swagger_schema_fields = {
@@ -38,7 +46,8 @@ class Base64ImageField(serializers.ImageField):
         }
 
 
-class ImageSerializer(serializers.ModelSerializer):
+class ImageModelSerializer(serializers.ModelSerializer):
+    image = Base64ImageField(use_url=True, required=True, allow_empty_file=False)
 
     class Meta:
         model = models.ImageModel

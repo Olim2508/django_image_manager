@@ -41,10 +41,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    # apps
+    "main",
+    
+    # third party libs
     "rest_framework",
     "django_filters",
     "corsheaders",
-    "main"
+    "drf_yasg",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
