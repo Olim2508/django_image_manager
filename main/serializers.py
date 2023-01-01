@@ -1,6 +1,7 @@
 import base64
 import imghdr
 import uuid
+from typing import List
 
 from rest_framework import serializers
 from gprof2dot import basestring
@@ -9,12 +10,13 @@ from drf_yasg import openapi
 from urllib3.packages import six
 
 from main import models
+from .models import ImageModel
+from .services import ImageService
 
 
 class Base64ImageField(serializers.ImageField):
 
     def to_internal_value(self, data):
-
         if isinstance(data, six.string_types):
             if 'data:' in data and ';base64,' in data:
                 header, data = data.split(';base64,')
@@ -32,7 +34,6 @@ class Base64ImageField(serializers.ImageField):
         return super(Base64ImageField, self).to_internal_value(data)
 
     def get_file_extension(self, file_name, decoded_file):
-
         extension = imghdr.what(file_name, decoded_file)
         extension = "jpg" if extension == "jpeg" else extension
         return extension
@@ -46,9 +47,28 @@ class Base64ImageField(serializers.ImageField):
         }
 
 
-class ImageModelSerializer(serializers.ModelSerializer):
+class PersonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Person
+        fields = "__all__"
+
+
+class BaseImageSerializer(serializers.ModelSerializer):
     image = Base64ImageField(use_url=True, required=True, allow_empty_file=False)
 
     class Meta:
         model = models.ImageModel
-        fields = "__all__"
+        fields = ['id', 'geo_location', 'description', 'image', 'created_at']
+
+
+class CreateUpdateImageSerializer(serializers.Serializer):
+    people_in_image = serializers.ListField(child=serializers.CharField(), required=False)
+    image = Base64ImageField(use_url=True, required=True, allow_empty_file=False)
+    geo_location = serializers.CharField(required=True)
+    description = serializers.CharField(required=True)
+
+    def create(self, validated_data):
+        people_in_image: List[str] = validated_data.pop("people_in_image")
+        image_instance = ImageModel.objects.create(**validated_data)
+        ImageService.add_bulk_people_to_image(people_in_image, image_instance)
+        return image_instance

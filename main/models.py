@@ -1,16 +1,11 @@
 from django.db import models
 
 
-class BaseModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class ImageModel(BaseModel):
+class ImageModel(models.Model):
     image = models.ImageField(upload_to='images')
     geo_location = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
-    # todo add people field which contains the people in image ["aleks", "john"]
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Image'
@@ -20,12 +15,12 @@ class ImageModel(BaseModel):
         return self.description
 
 
-# class Person(BaseModel):
-#     name = models.CharField(max_length=255)
-#     image = models.ForeignKey(ImageModel, related_name='person', on_delete=models.CASCADE)
-#
-#     def __str__(self):
-#         return self.name
-#
-#     class Meta:
-#         verbose_name_plural = 'People'
+class Person(models.Model):
+    name = models.CharField(max_length=255)
+    image = models.ForeignKey(ImageModel, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.id}-{self.name} -- {self.image.description}"
+
+    class Meta:
+        verbose_name_plural = 'People'
