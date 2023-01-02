@@ -5,7 +5,7 @@ from main.models import ImageModel, Person
 
 class PersonInline(admin.StackedInline):
     model = Person
-    fields = ('name',)
+    fields = ("name",)
     fk_name = "image"
 
 

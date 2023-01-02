@@ -3,32 +3,35 @@ import imghdr
 import uuid
 from typing import List
 
-from rest_framework import serializers
-from gprof2dot import basestring
 from django.core.files.base import ContentFile
 from drf_yasg import openapi
+from gprof2dot import basestring
+from rest_framework import serializers
 from urllib3.packages import six
 
 from main import models
+
 from .models import ImageModel
 from .services import ImageService
 
 
 class Base64ImageField(serializers.ImageField):
-
     def to_internal_value(self, data):
         if isinstance(data, six.string_types):
-            if 'data:' in data and ';base64,' in data:
-                header, data = data.split(';base64,')
+            if "data:" in data and ";base64," in data:
+                header, data = data.split(";base64,")
 
             try:
                 decoded_file = base64.b64decode(data)
             except TypeError:
-                self.fail('invalid_image')
+                self.fail("invalid_image")
 
             file_name = str(uuid.uuid4())[:12]
             file_extension = self.get_file_extension(file_name, decoded_file)
-            complete_file_name = "%s.%s" % (file_name, file_extension, )
+            complete_file_name = "%s.%s" % (
+                file_name,
+                file_extension,
+            )
             data = ContentFile(decoded_file, name=complete_file_name)
 
         return super(Base64ImageField, self).to_internal_value(data)
@@ -42,8 +45,8 @@ class Base64ImageField(serializers.ImageField):
         swagger_schema_fields = {
             "type": openapi.TYPE_STRING,
             "title": "Base64Image",
-            "description": 'Base64 Image',
-            "readOnly": False
+            "description": "Base64 Image",
+            "readOnly": False,
         }
 
 
@@ -58,11 +61,13 @@ class BaseImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ImageModel
-        fields = ['id', 'geo_location', 'description', 'image', 'created_at']
+        fields = ["id", "geo_location", "description", "image", "created_at"]
 
 
 class CreateImageSerializer(serializers.Serializer):
-    people_in_image = serializers.ListField(child=serializers.CharField(), required=False)
+    people_in_image = serializers.ListField(
+        child=serializers.CharField(), required=False
+    )
     image = Base64ImageField(use_url=True, required=True, allow_empty_file=False)
     geo_location = serializers.CharField(required=True)
     description = serializers.CharField(required=True)
@@ -76,4 +81,3 @@ class CreateImageSerializer(serializers.Serializer):
 
 class ImageOnlySerializer(serializers.Serializer):
     image = Base64ImageField(use_url=True, required=True, allow_empty_file=False)
-
