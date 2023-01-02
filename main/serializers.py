@@ -61,7 +61,7 @@ class BaseImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'geo_location', 'description', 'image', 'created_at']
 
 
-class CreateUpdateImageSerializer(serializers.Serializer):
+class CreateImageSerializer(serializers.Serializer):
     people_in_image = serializers.ListField(child=serializers.CharField(), required=False)
     image = Base64ImageField(use_url=True, required=True, allow_empty_file=False)
     geo_location = serializers.CharField(required=True)
@@ -72,3 +72,8 @@ class CreateUpdateImageSerializer(serializers.Serializer):
         image_instance = ImageModel.objects.create(**validated_data)
         ImageService.add_bulk_people_to_image(people_in_image, image_instance)
         return image_instance
+
+
+class ImageOnlySerializer(serializers.Serializer):
+    image = Base64ImageField(use_url=True, required=True, allow_empty_file=False)
+
