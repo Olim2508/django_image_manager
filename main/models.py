@@ -17,7 +17,7 @@ class ImageModel(models.Model):
 
 class Person(models.Model):
     name = models.CharField(max_length=255)
-    image = models.ForeignKey(ImageModel, on_delete=models.CASCADE)
+    image = models.ForeignKey(ImageModel, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"{self.id}-{self.name} -- {self.image.description}"

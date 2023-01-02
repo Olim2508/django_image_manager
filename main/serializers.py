@@ -53,15 +53,16 @@ class Base64ImageField(serializers.ImageField):
 class PersonSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Person
-        fields = "__all__"
+        fields = ["name"]
 
 
 class BaseImageSerializer(serializers.ModelSerializer):
     image = Base64ImageField(use_url=True, required=True, allow_empty_file=False)
+    people_in_image = PersonSerializer(many=True, source="person_set")
 
     class Meta:
         model = models.ImageModel
-        fields = ["id", "geo_location", "description", "image", "created_at"]
+        fields = ["id", "geo_location", "description", "image", "created_at", "people_in_image"]
 
 
 class CreateImageSerializer(serializers.Serializer):
@@ -73,9 +74,12 @@ class CreateImageSerializer(serializers.Serializer):
     description = serializers.CharField(required=True)
 
     def create(self, validated_data):
-        people_in_image: List[str] = validated_data.pop("people_in_image")
+        if validated_data.get("people_in_image"):
+            people_in_image = validated_data.pop("people_in_image")
+            image_instance = ImageModel.objects.create(**validated_data)
+            ImageService.add_bulk_people_to_image(people_in_image, image_instance)
+            return image_instance
         image_instance = ImageModel.objects.create(**validated_data)
-        ImageService.add_bulk_people_to_image(people_in_image, image_instance)
         return image_instance
 
 
