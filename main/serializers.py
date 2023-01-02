@@ -62,7 +62,14 @@ class BaseImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ImageModel
-        fields = ["id", "geo_location", "description", "image", "created_at", "people_in_image"]
+        fields = [
+            "id",
+            "geo_location",
+            "description",
+            "image",
+            "created_at",
+            "people_in_image",
+        ]
 
 
 class CreateImageSerializer(serializers.Serializer):
