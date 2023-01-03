@@ -16,13 +16,18 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth.decorators import login_required
 from django.urls import include, path
+from django.views.generic import RedirectView
 
 from .yasg import urlpatterns as swagger_url
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include("main.urls")),
+    path('', login_required(RedirectView.as_view(pattern_name='admin:index'))),
+    path('auth/', include("auth_app.urls")),
+    path('api/', include('rest_framework.urls')),
+    path("main/", include("main.urls")),
 ]
 
 urlpatterns += swagger_url

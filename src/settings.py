@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
 from pathlib import Path
+from .additional_settings.jwt_settings import *
 
 import environ
 
@@ -44,12 +45,17 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # apps
     "main",
+    "auth_app",
     # third party libs
     "rest_framework",
     "django_filters",
     "corsheaders",
     "drf_yasg",
+    'dj_rest_auth',
+    'rest_framework_simplejwt.token_blacklist',
 ]
+
+AUTH_USER_MODEL = 'auth_app.User'
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
@@ -103,6 +109,8 @@ DATABASES = {
     }
 }
 
+LOGIN_URL = 'rest_framework:login'
+LOGOUT_URL = 'rest_framework:logout'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -154,4 +162,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
 }
