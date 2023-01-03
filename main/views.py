@@ -45,5 +45,4 @@ class ImageViewSet(
         return BaseImageSerializer
 
     def get_images_only(self, request, *args, **kwargs):
-        print(self.request.user)
         return self.list(self, request, *args, **kwargs)
