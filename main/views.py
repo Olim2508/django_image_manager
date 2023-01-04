@@ -4,17 +4,13 @@ from rest_framework import mixins, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from main.filters import ImageFilter
-from main.models import ImageModel
+from main.filters import ImageFilter, PersonFilter
+from main.models import ImageModel, Person
 from main.serializers import (
     BaseImageSerializer,
     CreateImageSerializer,
-    ImageOnlySerializer,
+    ImageOnlySerializer, PersonSerializer,
 )
-
-
-def home(request):
-    return HttpResponse("Home page")
 
 
 class ImageViewSet(
@@ -23,6 +19,11 @@ class ImageViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
+    """
+        In POST request it is needed to pass image as base64 format.
+        Site for converting image to base 64 - https://www.base64-image.de/
+    """
+
     queryset = ImageModel.objects.all().order_by("id")
     pagination_class = PageNumberPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -46,3 +47,16 @@ class ImageViewSet(
 
     def get_images_only(self, request, *args, **kwargs):
         return self.list(self, request, *args, **kwargs)
+
+
+class PersonAutoCompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    Api for getting people name for autocomplete inputs
+    """
+
+    serializer_class = PersonSerializer
+    queryset = Person.objects.all().order_by("id")
+    filter_backends = (filters.DjangoFilterBackend,)
+    pagination_class = None
+    filterset_class = PersonFilter
+

@@ -53,7 +53,7 @@ class Base64ImageField(serializers.ImageField):
 class PersonSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Person
-        fields = ["name"]
+        exclude = ["image"]
 
 
 class BaseImageSerializer(serializers.ModelSerializer):

@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from .models import ImageModel
+from .models import ImageModel, Person
 
 
 class ImageFilter(filters.FilterSet):
@@ -15,3 +15,11 @@ class ImageFilter(filters.FilterSet):
     class Meta:
         model = ImageModel
         fields = ["geo_location", "description", "person"]
+
+
+class PersonFilter(filters.FilterSet):
+    name = filters.CharFilter(lookup_expr="icontains")
+
+    class Meta:
+        model = Person
+        fields = ["name"]
